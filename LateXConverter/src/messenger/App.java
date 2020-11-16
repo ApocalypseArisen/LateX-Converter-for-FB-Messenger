@@ -1,7 +1,14 @@
 package messenger;
 
 import javax.swing.JFrame;
+import java.awt.Cursor;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
+import java.text.Normalizer;
+
 import javax.swing.JPanel;
+import javax.swing.JLabel;
 import javax.swing.JButton;
 import javax.swing.JTextField;
 import java.awt.event.ActionListener;
@@ -10,23 +17,37 @@ import java.awt.event.ActionEvent;
 public class App extends JFrame implements ActionListener
 {
 	final int WIDTH = 400;
-	final int HEIGHT = 400;
+	final int HEIGHT = 185;
+	
+	private Cursor cursor = new Cursor(Cursor.HAND_CURSOR);
+	
+	JLabel inputLabel = new JLabel("Input: ");
+	JLabel outputLabel = new JLabel("Output: ");
 	
 	JTextField inputField = new JTextField(20);
 	JTextField outputField = new JTextField(20);
 	
 	JButton translateButton = new JButton("Convert");
+	JButton copyButton = new JButton("Copy");
 	
 	private void placeContent()
 	{
-		inputField.setBounds(0, 0, 80, 20);
-		outputField.setBounds(40, 40, 40, 20);
-		translateButton.setBounds(200, 0, 80, 30);
+		inputField.setBounds(75, 20, 290, 20);
+		outputField.setBounds(75, 60, 290, 20);
+		translateButton.setBounds(20, 100, 80, 30);
+		copyButton.setBounds(285, 100, 80, 30);
+		inputLabel.setBounds(20, 20, 45, 20);
+		outputLabel.setBounds(20, 60, 45, 20);
 	}
 
 	
 	public App()
 	{
+		translateButton.setCursor(cursor);
+		copyButton.setCursor(cursor);
+		
+		outputField.setEditable(false);
+		
 		setTitle("LateXConverter");
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		setSize(WIDTH, HEIGHT);
@@ -34,6 +55,7 @@ public class App extends JFrame implements ActionListener
 		setLocationRelativeTo(null);
 		
 		translateButton.addActionListener(this);
+		copyButton.addActionListener(this);
 		
 		JPanel panel = new JPanel();
 		panel.setLayout(null);
@@ -41,6 +63,9 @@ public class App extends JFrame implements ActionListener
 		panel.add(inputField);
 		panel.add(outputField);
 		panel.add(translateButton);
+		panel.add(copyButton);
+		panel.add(inputLabel);
+		panel.add(outputLabel);
 		
 		setContentPane(panel);
 		placeContent();
@@ -52,8 +77,18 @@ public class App extends JFrame implements ActionListener
 		String output = inputField.getText();
 		output = output.replace(" ", "\\ ");
 		output = Normalizer.normalize(output, Normalizer.Form.NFD);
+		output = output.replaceAll("[^\\p{ASCII}]", "");
+		output = output.replaceAll("\\p{M}", "");
 		output = "$$ " + output + " $$";
 		outputField.setText(output);
+	}
+	
+	private void copyText()
+	{
+		String text = outputField.getText();
+		StringSelection selection = new StringSelection(text);
+		Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+		clipboard.setContents(selection, selection);
 	}
 	
 	@Override
@@ -61,5 +96,6 @@ public class App extends JFrame implements ActionListener
 	{
 		Object eventSource = event.getSource();
 		if(eventSource == translateButton) { convertMessage(); }
+		if(eventSource == copyButton) { copyText(); }
 	}
 }
