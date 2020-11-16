@@ -16,6 +16,8 @@ import java.awt.event.ActionEvent;
 
 public class App extends JFrame implements ActionListener
 {
+	private static final long serialVersionUID = 1L;
+	
 	final int WIDTH = 400;
 	final int HEIGHT = 185;
 	
